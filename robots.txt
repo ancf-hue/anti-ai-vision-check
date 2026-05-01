@@ -1,20 +1,6 @@
-# 🤖 ROBOTS.TXT для Anti AI Vision Check
-# Разрешает индексацию всем поисковым роботам
-
+# Разрешить всем роботам индексировать сайт
 User-agent: *
 Allow: /
 
-# Запрещаем индексацию служебных страниц (если есть)
-Disallow: /audio/
-Disallow: /screenshots/
-Disallow: /temp/
-Disallow: /private/
-
-# Указываем путь к sitemap
+# Указать путь к карте сайта
 Sitemap: https://anti-ai-vision-check.vercel.app/sitemap.xml
-
-# Задержка для роботов (секунды)
-Crawl-delay: 5
-
-# Хост сайта
-Host: https://anti-ai-vision-check.vercel.app
