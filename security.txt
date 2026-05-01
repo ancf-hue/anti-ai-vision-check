@@ -1,0 +1,8 @@
+# Security policy for Anti AI Vision Check
+
+Contact: mailto:security@antiai-vision.com
+Contact: https://t.me/anti_ai_security
+Preferred-Languages: ru, en
+Canonical: https://anti-ai-vision-check.vercel.app/.well-known/security.txt
+Policy: https://github.com/anti-ai/vision-check/security/policy
+Hiring: https://github.com/anti-ai

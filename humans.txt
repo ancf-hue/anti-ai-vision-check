@@ -1,0 +1,17 @@
+# HUMAN.TXT для Anti AI Vision Check
+
+/* TEAM */
+  Developer: Anti AI Team
+  Contact: support@antiai-vision.com
+  
+/* TECHNOLOGY */
+  HTML5, CSS3, JavaScript (ES6+)
+  Canvas API, Web Audio API
+  
+/* THANKS */
+  Всем, кто поддерживает проект!
+  
+/* SITE */
+  Language: Russian, English
+  Platform: Web (Mobile First)
+  Last update: 2024
