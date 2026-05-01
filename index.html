@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>👁️ Anti AI Vision Check</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    :root{--g:#00FF6A;--bg:#050505;--ui:#0A0A0A;--text:#AAA}
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    body{background:#000;min-height:100vh;display:flex;justify-content:center;align-items:center;font-family:system-ui;color:var(--g);overflow:hidden;user-select:none}
+    .screen{position:relative;width:100vw;height:100vh;max-width:450px;max-height:800px;background:var(--bg);margin:auto;display:none;flex-direction:column}
+    .screen.active{display:flex}
+    
+    /* Логотип по центру вверху */
+    .logo{text-align:center;padding:8px 0;border-bottom:1px solid #1A1A1A;background:var(--bg);z-index:10}
+    .logo img{width:40px;height:40px;vertical-align:middle}
+    
+    /* Стили для начального экрана (сплэш) */
+    .splash-screen{position:relative;width:100vw;height:100vh;max-width:450px;max-height:800px;aspect-ratio:9/16;background:#000;overflow:hidden;margin:auto;display:block}
+    .layers{position:absolute;top:0;left:0;width:100%;height:100%;}
+    .layers img,.layers video{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block;}
+    .sound-btn{position:absolute;top:18px;left:18px;z-index:30;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);border-radius:60px;border:1px solid rgba(255,255,255,0.4);padding:12px 26px;cursor:pointer;display:flex;align-items:center;gap:12px;font-weight:bold;font-size:1.4rem;color:white;transition:0.1s ease;font-family:system-ui;}
+    .sound-btn:active{transform:scale(0.96);}
+    .sound-btn .ico{font-size:1.9rem;}
+    .sound-btn .txt{font-size:1.25rem;}
+    @media (max-width:480px){.sound-btn{padding:8px 20px;}.sound-btn .ico{font-size:1.6rem;}.sound-btn .txt{font-size:1.1rem;}}
+    
+    .header{text-align:center;padding:8px 16px;background:#1e293b;border-bottom:1px solid #334155;position:relative;display:flex;align-items:center;justify-content:center}
+    .header .back-header-btn{position:absolute;top:8px;left:12px;background:#1e293b;border:none;border-radius:30px;width:36px;height:36px;font-size:20px;cursor:pointer;color:var(--g)}
+    .header .lang-toggle{position:absolute;top:8px;right:12px;background:#1e293b;border:1px solid var(--g);border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;color:var(--g)}
+    #stages{flex:1;overflow-y:auto;padding:20px}
+    .instr{color:#94a3b8;font-size:14px;margin-bottom:12px;text-align:center}
+    .btn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:320px;margin:8px auto 0}
+    .vision-btn{padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;background:#1e293b;color:#fff;border:1px solid #334155;transition:0.05s}
+    .vision-btn:active{transform:scale(0.96)}
+    .vision-btn.primary{background:#38bdf8;color:#000}
+    .duo-box{display:flex;height:120px;border-radius:15px;overflow:hidden;margin:10px 0;width:280px;font-size:32px;font-weight:bold}
+    .red-part{background:#ff3b30;flex:1;display:flex;align-items:center;justify-content:center}
+    .green-part{background:#34c759;flex:1;display:flex;align-items:center;justify-content:center}
+    .status-ball{width:70px;height:70px;border-radius:50%;margin:10px auto;display:flex;align-items:center;justify-content:center;font-size:32px}
+    .green{background:#4ade80}.yellow{background:#fbbf24}.red{background:#f87171}
+    .final-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:16px}
+    .alert-box{background:rgba(56,189,248,0.1);padding:12px;border-radius:12px}
+    .perimetry-stage{position:relative;width:260px;height:260px;background:#111;border-radius:50%;margin:10px auto;cursor:pointer;border:3px solid #334155;overflow:hidden}
+    .flash{position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;opacity:0;transition:opacity 0.05s}
+    .squares{display:flex;flex-wrap:wrap;width:210px;margin:10px auto;gap:8px;justify-content:center}
+    .square{width:60px;height:60px;background:#334155;border-radius:8px;cursor:pointer;transition:0.05s}
+    .square.active{background:#4ade80;transform:scale(0.95)}
+    .contrast-bar{width:200px;height:40px;border-radius:20px;margin:10px auto}
+    .figures{display:flex;gap:15px;justify-content:center;margin:15px 0}
+    .fig-item{font-size:40px;cursor:pointer;padding:10px;background:#1e293b;border-radius:12px;width:65px;text-align:center;transition:0.05s}
+    .fig-item:active{transform:scale(0.95)}
+    .rabkin-container{width:220px;height:220px;border-radius:50%;background:#eee;position:relative;margin:10px auto;overflow:hidden}
+    .rabkin-dot{position:absolute;border-radius:50%}
+    .rabkin-digit-overlay{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:100px;font-weight:bold;color:rgba(255,0,0,0.15);pointer-events:none}
+    .landolt-ring{width:60px;height:60px;border:8px solid #fff;border-radius:50%;margin:20px auto;transition:transform 0.1s}
+    .color-circle{width:220px;height:220px;border-radius:50%;margin:10px auto;display:flex;align-items:center;justify-content:center}
+    .color-digit{font-size:90px;font-weight:bold;font-family:monospace}
+    .astig-canvas,.siemens-canvas{width:200px;height:200px;background:#111;border-radius:50%;margin:10px}
+    .amsler-canvas{width:260px;height:260px;background:#000;border:2px solid #fff;margin:10px}
+    .progress-bar{position:fixed;bottom:0;left:0;right:0;height:3px;background:#334155;z-index:100}
+    .progress-fill{height:100%;background:var(--g);width:0%;transition:width 0.2s ease}
+    
+    /* Страница инструкции - скрытый скроллбар */
+    .howto-content{flex:1;padding:24px 20px;overflow-y:auto;scrollbar-width:none;-ms-overflow-style:none}
+    .howto-content::-webkit-scrollbar{display:none;width:0;height:0}
+    .howto-content h1{font-size:1.3rem;text-align:center;margin-bottom:16px;color:var(--g)}
+    .desc{font-size:0.9rem;line-height:1.6;color:var(--text);text-align:center;margin-bottom:20px}
+    .step{background:#0A0A0A;border-radius:12px;padding:14px;border-left:3px solid var(--g);margin-bottom:12px}
+    .step b{color:var(--g);display:block;margin-bottom:4px}
+    .step span{color:#AAA;font-size:0.85rem}
+    .btn-start{background:var(--g);color:#000;border:none;border-radius:30px;padding:16px;font-size:1.2rem;font-weight:bold;cursor:pointer;width:100%;margin-top:20px}
+    .btn-start:active{transform:scale(0.98)}
+    .howto-footer{text-align:center;font-size:0.7rem;color:#555;padding:12px;border-top:1px solid #1A1A1A;margin-top:auto}
+    .support-btn{background:#222;color:var(--g);border:1px solid var(--g);border-radius:30px;padding:12px;font-size:0.9rem;cursor:pointer;width:100%;margin-top:12px}
+    .support-btn:active{transform:scale(0.98)}
+    #supportPanel{background:#0A0A0A;border-top:1px solid #1A1A1A;padding:16px 20px 24px;display:none;flex-direction:column;gap:12px}
+    #supportPanel.show{display:flex}
+    .support-title{display:flex;align-items:center;gap:8px;color:var(--g);font-weight:bold}
+    .support-text{font-size:0.85rem;color:#AAA;line-height:1.5}
+    .phone-box{background:#111;border-radius:10px;padding:12px;display:flex;align-items:center;justify-content:space-between}
+    .phone-number{font-size:1.1rem;color:var(--g);font-weight:bold}
+    .copy-btn{background:var(--g);color:#000;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:bold}
+    .support-note{font-size:0.7rem;color:#666;text-align:center}
+    
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  </style>
+</head>
+<body>
+
+<!-- НАЧАЛЬНЫЙ ЭКРАН: фото 2 сек + видео 3 сек -->
+<div id="splashContainer" class="splash-screen">
+  <div class="layers">
+    <img id="photo" src="frame.jpg" style="z-index:2">
+    <video id="video" src="cube.mp4" muted playsinline preload="auto" style="z-index:1"></video>
+  </div>
+  <div class="title-overlay" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#00FF6A;font-size:1.8rem;font-weight:bold;text-align:center;z-index:20;text-shadow:0 0 20px rgba(0,255,106,0.5);pointer-events:none">
+    Анти ИИ<br>Проверка зрения
+  </div>
+  <button id="soundBtn" class="sound-btn"><span class="ico">🔇</span><span class="txt">Вкл звук</span></button>
+</div>
+
+<!-- СТРАНИЦА 2: ИНСТРУКЦИЯ -->
+<div id="howto" class="screen">
+  <div class="logo"><img src="favicon.ico" alt="logo"></div>
+  <div class="howto-content">
+    <h1 data-t="howto_title">👁️ Анти-ИИ Проверка зрения</h1>
+    <div class="desc" data-t="howto_desc">Бесплатное приложение для самопроверки зрения по 13 профессиональным тестам.</div>
+    
+    <div class="step"><b data-t="step1_b">📏 Дистанция</b><span data-t="step1_t">Держите телефон на расстоянии ~40 см (вытянутая рука).</span></div>
+    <div class="step"><b data-t="step2_b">👁️ Проверка</b><span data-t="step2_t">Закройте один глаз непрозрачной заслонкой (не ладонью). Не щурьтесь.</span></div>
+    <div class="step"><b data-t="step3_b">⚡ Скорость</b><span data-t="step3_t">Мгновенный переход между тестами. Отвечайте без задержек.</span></div>
+    <div class="step"><b data-t="step4_b">🎲 Случайность</b><span data-t="step4_t">13 упражнений в случайном порядке. Каждый проход уникален!</span></div>
+    <div class="step"><b data-t="step5_b">📊 Результат</b><span data-t="step5_t">После всех тестов вы получите общий балл и рекомендации.</span></div>
+    
+    <button class="support-btn" id="btnSupport" data-t="support_btn">🤝 Поддержать проект</button>
+    <button class="btn-start" id="btnStartApp" data-t="start_btn">▶ Начать проверку</button>
+  </div>
+  
+  <div id="supportPanel">
+    <div class="support-title"><span>💙</span> <span data-t="support_title">ПОДДЕРЖАТЬ ПРОЕКТ</span></div>
+    <div class="support-text" data-t="support_text">Приложение бесплатное. Было и останется.<br><br>Если проект помог вам или вашим близким — можете поддержать разработку добровольным переводом.</div>
+    <div class="phone-box">
+      <span class="phone-number" id="phoneNum">8-920-227-56-76</span>
+      <button class="copy-btn" id="copyBtn" data-t="copy_btn">📋 Копировать</button>
+    </div>
+    <div class="support-note" data-t="support_note">✅ Деньги придут мгновенно. Без комиссии. Безопасно.<br><br>❤️ Спасибо за поддержку!</div>
+    <button class="support-btn" id="btnBack" style="background:#222;color:var(--g);border:1px solid var(--g);margin-top:8px" data-t="back_btn">← Назад к инструкции</button>
+  </div>
+  
+  <div class="howto-footer" data-t="footer">v2.0 • 13 тестов • Случайный порядок • Офлайн • Бесплатно</div>
+</div>
+
+<!-- СТРАНИЦА 3: ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
+<div id="app" class="screen">
+  <div class="logo"><img src="favicon.ico" alt="logo"></div>
+  <div class="header">
+    <span id="testCounter">Тест 1 / 13</span>
+    <button class="back-header-btn" id="appBack">←</button>
+    <div class="lang-toggle" id="langToggle">RU</div>
+  </div>
+  <div id="stages">
+    <div id="stage-letters" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="letters_instr">Какая это буква?</div>
+      <div id="test-letter" style="font-size:80px;font-family:monospace;margin:20px">Ш</div>
+      <div class="btn-grid" id="letters-btns"></div>
+    </div>
+    
+    <div id="stage-astig1" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="astig1_instr">Все линии одинаково четкие?</div>
+      <canvas id="astig1-canvas" width="200" height="200" class="astig-canvas"></canvas>
+      <div class="btn-grid" id="astig1-btns"></div>
+    </div>
+    
+    <div id="stage-duochrome" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="duochrome_instr">Где буквы четче?</div>
+      <div class="duo-box"><div class="red-part">А Б</div><div class="green-part">А Б</div></div>
+      <div class="btn-grid" id="duochrome-btns"></div>
+    </div>
+    
+    <div id="stage-ai" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="ai_instr">Найдите слово с ошибкой</div>
+      <div id="ai-words" style="background:#1e293b;padding:20px;border-radius:12px;margin:10px;font-family:monospace;font-size:18px;text-align:center"></div>
+      <div id="ai-btns" class="btn-grid"></div>
+    </div>
+    
+    <div id="stage-rabkin" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="rabkin_instr">Какую цифру видите?</div>
+      <div id="rabkin-container" class="rabkin-container"></div>
+      <div class="btn-grid" id="rabkin-btns"></div>
+    </div>
+    
+    <div id="stage-landolt" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="landolt_instr">Куда направлен разрыв?</div>
+      <div id="landolt-ring" class="landolt-ring"></div>
+      <div class="btn-grid" id="landolt-btns"></div>
+    </div>
+    
+    <div id="stage-ishihara" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="ishihara_instr">Какую цифру видите?</div>
+      <div id="ishihara-circle" class="color-circle"><span id="ishihara-num" class="color-digit">8</span></div>
+      <div class="btn-grid" id="ishihara-btns"></div>
+    </div>
+    
+    <div id="stage-perimetry" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="perimetry_instr">Смотрите в центр. Нажимайте на вспышку!</div>
+      <div class="perimetry-stage" id="perimetry-stage">
+        <div style="position:absolute;top:50%;left:50%;width:8px;height:8px;background:#ff4444;border-radius:50%;transform:translate(-50%,-50%)"></div>
+        <div id="perimetry-flash" class="flash"></div>
+      </div>
+      <div class="btn-grid"><button id="startPerimetry" class="vision-btn primary">▶ Начать</button><button id="skipPerimetry" class="vision-btn">Пропустить</button></div>
+    </div>
+    
+    <div id="stage-amsler" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="amsler_instr">Все линии прямые?</div>
+      <canvas id="amsler-canvas" width="260" height="260" class="amsler-canvas"></canvas>
+      <div class="btn-grid" id="amsler-btns"></div>
+    </div>
+    
+    <div id="stage-siemens" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="siemens_instr">Все линии сходятся в центре?</div>
+      <canvas id="siemens-canvas" width="200" height="200" class="siemens-canvas"></canvas>
+      <div class="btn-grid" id="siemens-btns"></div>
+    </div>
+    
+    <div id="stage-figures" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="figures_instr">Какая фигура отличается?</div>
+      <div id="figures-cont" class="figures"></div>
+      <div class="btn-grid" id="figures-btns"></div>
+    </div>
+    
+    <div id="stage-pulse" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="pulse_instr">Нажимайте на мигающий квадрат</div>
+      <div id="pulse-squares" class="squares"></div>
+      <div class="btn-grid"><button id="startPulse" class="vision-btn primary">▶ Начать</button><button id="skipPulse" class="vision-btn">Пропустить</button></div>
+    </div>
+    
+    <div id="stage-contrast" style="display:none;flex-direction:column;align-items:center">
+      <div class="instr" data-t="contrast_instr">Какой уровень контрастности?</div>
+      <div id="contrast-bar" class="contrast-bar"></div>
+      <div class="btn-grid" id="contrast-btns"></div>
+    </div>
+    
+    <div id="stage-final" style="display:none;flex-direction:column;align-items:center">
+      <h2 data-t="final_title">Результат</h2>
+      <div id="final-ball" class="status-ball">●</div>
+      <div id="final-box" class="alert-box"></div>
+      <p id="final-text"></p>
+      <div class="final-actions">
+        <button id="restartBtn" class="vision-btn primary">🔄 Пройти снова</button>
+        <button id="shareResults" class="vision-btn">📤 Поделиться</button>
+        <button id="toMenu" class="vision-btn">📋 В меню</button>
+      </div>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<script>
+// ========== НАЧАЛЬНЫЙ ЭКРАН ==========
+const photo = document.getElementById('photo');
+const video = document.getElementById('video');
+const splashContainer = document.getElementById('splashContainer');
+const soundBtn = document.getElementById('soundBtn');
+const ico = soundBtn.querySelector('.ico');
+const txt = soundBtn.querySelector('.txt');
+
+let soundOn = false;
+let videoStarted = false;
+let splashEnded = false;
+
+video.muted = true;
+
+function updBtn() { 
+  soundOn ? (ico.innerText = '🔊', txt.innerText = 'Звук вкл') : (ico.innerText = '🔇', txt.innerText = 'Вкл звук'); 
+}
+
+soundBtn.onclick = () => {
+  if (soundOn) { 
+    video.muted = true; 
+    soundOn = false; 
+  } else { 
+    video.muted = false; 
+    soundOn = true; 
+    if (videoStarted && video.paused) video.play().catch(() => {}); 
+  }
+  updBtn();
+};
+
+function switchToVideo() {
+  if (videoStarted) return;
+  videoStarted = true;
+  video.style.zIndex = '2';
+  photo.style.zIndex = '1';
+  video.play().catch(e => console.log);
+  
+  setTimeout(() => {
+    if (video && !video.ended) video.pause();
+    if (!splashEnded) {
+      splashEnded = true;
+      splashContainer.style.display = 'none';
+      showScreen('howto');
+    }
+  }, 3000);
+}
+
+if (photo.complete && photo.naturalWidth) {
+  setTimeout(switchToVideo, 2000);
+} else {
+  photo.onload = () => setTimeout(switchToVideo, 2000);
+  setTimeout(() => { if (!videoStarted) switchToVideo(); }, 2500);
+}
+updBtn();
+
+// ========== ПЕРЕВОДЫ ==========
+const translations = {
+  ru: {
+    howto_title: '👁️ Анти-ИИ Проверка зрения',
+    howto_desc: 'Бесплатное приложение для самопроверки зрения по 13 профессиональным тестам.',
+    step1_b: '📏 Дистанция', step1_t: 'Держите телефон на расстоянии ~40 см (вытянутая рука).',
+    step2_b: '👁️ Проверка', step2_t: 'Закройте один глаз непрозрачной заслонкой (не ладонью). Не щурьтесь.',
+    step3_b: '⚡ Скорость', step3_t: 'Мгновенный переход между тестами. Отвечайте без задержек.',
+    step4_b: '🎲 Случайность', step4_t: '13 упражнений в случайном порядке. Каждый проход уникален!',
+    step5_b: '📊 Результат', step5_t: 'После всех тестов вы получите общий балл и рекомендации.',
+    support_btn: '🤝 Поддержать проект', start_btn: '▶ Начать проверку',
+    support_title: 'ПОДДЕРЖАТЬ ПРОЕКТ', support_text: 'Приложение бесплатное. Было и останется.\n\nЕсли проект помог вам или вашим близким — можете поддержать разработку добровольным переводом.',
+    copy_btn: '📋 Копировать', support_note: '✅ Деньги придут мгновенно. Без комиссии. Безопасно.\n\n❤️ Спасибо за поддержку!',
+    back_btn: '← Назад к инструкции', footer: 'v2.0 • 13 тестов • Случайный порядок • Офлайн • Бесплатно',
+    letters_instr: 'Какая это буква?', astig1_instr: 'Все линии одинаково четкие?',
+    duochrome_instr: 'Где буквы четче?', duo_red: 'На красном', duo_green: 'На зеленом', duo_same: 'Одинаково',
+    ai_instr: 'Найдите слово с ошибкой (0 вместо О)', rabkin_instr: 'Какую цифру видите?',
+    landolt_instr: 'Куда направлен разрыв?', ishihara_instr: 'Какую цифру видите?',
+    perimetry_instr: 'Смотрите в центр. Нажимайте на вспышку!', perimetry_start: '▶ Начать',
+    amsler_instr: 'Все линии прямые?', siemens_instr: 'Все линии сходятся в центре?',
+    figures_instr: 'Какая фигура отличается?', pulse_instr: 'Нажимайте на мигающий квадрат', pulse_start: '▶ Начать',
+    contrast_instr: 'Какой уровень контрастности?', skip_btn: 'Пропустить',
+    final_title: 'Результат', restart_btn: '🔄 Пройти снова', 
+    result_excellent: 'Отлично! Ваше зрение в хорошем состоянии.',
+    result_warning: 'Внимание! Глаза устали. Сделайте перерыв.',
+    result_critical: 'Рекомендуется обратиться к офтальмологу.',
+    warn_rabkin: '⚠️ Возможные нарушения цветоощущения',
+    warn_ishihara: '⚠️ Возможные нарушения цветовосприятия',
+    warn_astig: '⚠️ Возможный астигматизм',
+    warn_amsler: '🔲 Возможные искажения сетчатки',
+    warn_perimetry: '👁️ Возможное сужение поля зрения'
+  },
+  en: {
+    howto_title: '👁️ Anti AI Vision Check',
+    howto_desc: 'Free app for self-checking vision with 13 professional tests.',
+    step1_b: '📏 Distance', step1_t: 'Hold phone ~40 cm away (arm\'s length).',
+    step2_b: '👁️ Testing', step2_t: 'Cover one eye with opaque shield (not palm). Don\'t squint.',
+    step3_b: '⚡ Speed', step3_t: 'Instant transition between tests. Respond without delays.',
+    step4_b: '🎲 Random', step4_t: '13 exercises in random order. Each pass is unique!',
+    step5_b: '📊 Result', step5_t: 'After all tests you will get a total score and recommendations.',
+    support_btn: '🤝 Support Project', start_btn: '▶ Start Check',
+    support_title: 'SUPPORT PROJECT', support_text: 'App is free. Always will be.\n\nIf this helped you or your loved ones — you can support development with a voluntary donation.',
+    copy_btn: '📋 Copy', support_note: '✅ Instant transfer. No fees. Secure.\n\n❤️ Thank you for support!',
+    back_btn: '← Back to instructions', footer: 'v2.0 • 13 tests • Random order • Offline • Free',
+    letters_instr: 'Which letter?', astig1_instr: 'All lines equally clear?',
+    duochrome_instr: 'Where are letters clearer?', duo_red: 'On red', duo_green: 'On green', duo_same: 'Same',
+    ai_instr: 'Find word with error (0 instead of O)', rabkin_instr: 'What digit do you see?',
+    landolt_instr: 'Which direction?', ishihara_instr: 'What digit do you see?',
+    perimetry_instr: 'Look at center. Tap the flash!', perimetry_start: '▶ Start',
+    amsler_instr: 'All lines straight?', siemens_instr: 'All lines converge?',
+    figures_instr: 'Which shape is different?', pulse_instr: 'Tap the flashing square', pulse_start: '▶ Start',
+    contrast_instr: 'Contrast level?', skip_btn: 'Skip',
+    final_title: 'Result', restart_btn: '🔄 Try Again',
+    result_excellent: 'Excellent! Your vision is good.',
+    result_warning: 'Attention! Eyes are tired. Take a break.',
+    result_critical: 'Recommended to consult an ophthalmologist.',
+    warn_rabkin: '⚠️ Possible color vision deficiency',
+    warn_ishihara: '⚠️ Possible color perception issues',
+    warn_astig: '⚠️ Possible astigmatism',
+    warn_amsler: '🔲 Possible retinal distortion',
+    warn_perimetry: '👁️ Possible visual field narrowing'
+  }
+};
+
+// ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+let currentLang = 'ru';
+let score = 0;
+let currentIndex = 0;
+let order = [];
+let results = {};
+let level = 0;
+let levels = [72, 58, 46, 36, 28, 22];
+let allStages = ['letters', 'astig1', 'duochrome', 'ai', 'rabkin', 'landolt', 'ishihara', 'perimetry', 'amsler', 'siemens', 'figures', 'pulse', 'contrast'];
+
+let perimetryActive = false, perimetryCount = 0, perimetryHits = 0, perimetryTimer = null;
+let pulseActive = false, pulseExpected = 0, pulseHits = 0, pulseTotal = 0, pulseInterval = null;
+let currentTestInstance = null;
+
+// ========== АУДИО СИСТЕМА ==========
+let audioUnlocked = false;
+let currentAudio = null;
+
+function playSound(soundType) {
+  if (!audioUnlocked) return;
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+  let fileName = '';
+  if (soundType === 'correct') {
+    fileName = currentLang === 'ru' ? 'verno.mp3' : 'correct.mp3';
+  } else if (soundType === 'wrong') {
+    fileName = currentLang === 'ru' ? 'neverno.mp3' : 'wrong.mp3';
+  } else if (soundType === 'complete') {
+    fileName = currentLang === 'ru' ? 'test-zavershen.mp3' : 'complete.mp3';
+  }
+  if (!fileName) return;
+  currentAudio = new Audio(fileName);
+  currentAudio.play().catch(e => console.log('🔇 Audio error:', e.message));
+}
+
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+  console.log('🔊 Аудио разблокировано');
+}
+
+document.body.addEventListener('click', unlockAudio, { once: true });
+document.body.addEventListener('touchstart', unlockAudio, { once: true });
+
+function playCorrect() { playSound('correct'); }
+function playWrong() { playSound('wrong'); }
+function playComplete() { playSound('complete'); }
+
+// ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+function t(key) { return translations[currentLang]?.[key] || key; }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function showStage(stageId) {
+  document.querySelectorAll('#stages > div').forEach(div => div.style.display = 'none');
+  const el = document.getElementById('stage-' + stageId);
+  if (el) el.style.display = 'flex';
+}
+
+function clearActiveTests() {
+  if (perimetryTimer) { clearTimeout(perimetryTimer); perimetryTimer = null; }
+  if (pulseInterval) { clearInterval(pulseInterval); pulseInterval = null; }
+  perimetryActive = false;
+  pulseActive = false;
+}
+
+function updateCounter() {
+  const counter = document.getElementById('testCounter');
+  if (counter && order.length) {
+    // ✅ ИСПРАВЛЕНО: защита от выхода за пределы
+    const displayIndex = Math.min(currentIndex + 1, order.length);
+    counter.innerText = `${currentLang === 'ru' ? 'Тест' : 'Test'} ${displayIndex} / ${order.length}`;
+  }
+}
+
+function updateProgress() {
+  const fill = document.getElementById('progressFill');
+  if (fill && order.length) {
+    // ✅ ИСПРАВЛЕНО: прогресс не может быть больше 100%
+    const progress = Math.min(((currentIndex + 1) / order.length) * 100, 100);
+    fill.style.width = progress + '%';
+  }
+}
+
+function nextExercise() {
+  clearActiveTests();
+  currentIndex++;
+  updateCounter();
+  updateProgress();
+  
+  // ✅ Если прошли все тесты - показываем финал
+  if (currentIndex >= order.length) {
+    showFinal();
+  } else {
+    const stage = order[currentIndex];
+    currentTestInstance = stage;
+    showStage(stage);
+    if (window[`run_${stage}`]) window[`run_${stage}`]();
+  }
+}
+
+// ========== ВСЕ ТЕСТЫ ==========
+
+// 1. ТЕСТ БУКВ
+window.run_letters = function() {
+  const symbols = currentLang === 'ru' ? "ШБМНКЫИ" : "EFPZLT";
+  let target = symbols[Math.floor(Math.random() * symbols.length)];
+  const letterDiv = document.getElementById('test-letter');
+  if (letterDiv) {
+    letterDiv.innerHTML = target;
+    letterDiv.style.fontSize = levels[Math.min(level, levels.length-1)] + 'px';
+  }
+  const btnsDiv = document.getElementById('letters-btns');
+  if (!btnsDiv) return;
+  btnsDiv.innerHTML = '';
+  
+  let wrongOptions = symbols.split('').filter(s => s !== target);
+  let wrong = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+  let options = [target, wrong];
+  options.sort(() => Math.random() - 0.5);
+  
+  for (let opt of options) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt === target) {
+        playCorrect();
+        if (level < levels.length - 1) {
+          level++;
+          window.run_letters();
+        } else {
+          score += 50;
+          nextExercise();
+        }
+      } else {
+        playWrong();
+        score += level * 5;
+        nextExercise();
+      }
+    };
+    btnsDiv.appendChild(btn);
+  }
+};
+
+// 2. ТЕСТ АСТИГМАТИЗМА
+window.run_astig1 = function() {
+  try {
+    const canvas = document.getElementById('astig1-canvas');
+    if (canvas && canvas.getContext) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 200, 200);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 12; i++) {
+        let angle = i * 30 * Math.PI / 180;
+        let x2 = 100 + Math.cos(angle) * 90;
+        let y2 = 100 + Math.sin(angle) * 90;
+        ctx.beginPath();
+        ctx.moveTo(100, 100);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+    }
+  } catch(e) { console.warn('Canvas error:', e); }
+  
+  const btns = document.getElementById('astig1-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  const correctAnswer = currentLang === 'ru' ? 'Да, все четкие' : 'Yes, all clear';
+  const wrongAnswer = currentLang === 'ru' ? 'Нет, есть размытие' : 'No, some blurry';
+  let options = [correctAnswer, wrongAnswer];
+  options.sort(() => Math.random() - 0.5);
+  for (let opt of options) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt === correctAnswer) { playCorrect(); score += 10; results.astig = true; }
+      else { playWrong(); results.astig = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 3. ДУОХРОМНЫЙ ТЕСТ
+window.run_duochrome = function() {
+  const btnsDiv = document.getElementById('duochrome-btns');
+  if (!btnsDiv) return;
+  btnsDiv.innerHTML = '';
+  const options = [
+    { value: 'red', text: t('duo_red') },
+    { value: 'green', text: t('duo_green') },
+    { value: 'same', text: t('duo_same') }
+  ];
+  for (let opt of options) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt.text;
+    btn.onclick = () => {
+      if (opt.value === 'red' || opt.value === 'same') { playCorrect(); score += 25; }
+      else { playWrong(); }
+      nextExercise();
+    };
+    btnsDiv.appendChild(btn);
+  }
+};
+
+// 4. ТЕСТ AI (НАЙДИТЕ СЛОВО С ОШИБКОЙ) - 15+ слов
+window.run_ai = function() {
+  const wordBank = currentLang === 'ru' ? [
+    { text: "ЭКРАН", error1: "ЭКР0Н", error2: "ЭКР4Н", error3: "3КРАН" },
+    { text: "СИСТЕМА", error1: "СИСТЕМ0", error2: "СИСТ3МА", error3: "С1СТЕМА" },
+    { text: "ОБЪЕКТ", error1: "0БЪЕКТ", error2: "ОБЪ3КТ", error3: "ОБЪЕК7" },
+    { text: "ПОТОК", error1: "П0ТОК", error2: "ПОТ0К", error3: "ПО7ОК" },
+    { text: "ЗРЕНИЕ", error1: "ЗР3НИЕ", error2: "ЗРЕНИ3", error3: "ЗРЕН1Е" },
+    { text: "ТЕЛЕФОН", error1: "ТЕЛЕФ0Н", error2: "Т3ЛЕФОН", error3: "ТЕЛЕФ4Н" },
+    { text: "ПРОВЕРКА", error1: "ПР0ВЕРКА", error2: "ПРОВ3РКА", error3: "ПРОВЕРК4" },
+    { text: "МОНИТОР", error1: "М0НИТОР", error2: "МОН1ТОР", error3: "МОНИТ4Р" },
+    { text: "КОМПЬЮТЕР", error1: "К0МПЬЮТЕР", error2: "КОМПЬЮТ3Р", error3: "КОМПЬ6ТЕР" },
+    { text: "ДИСПЛЕЙ", error1: "ДИСПЛ3Й", error2: "ДИСПЛ6Й", error3: "Д1СПЛЕЙ" },
+    { text: "РАЗРЕШЕНИЕ", error1: "РАЗР3ШЕНИЕ", error2: "РАЗРЕШ3НИЕ", error3: "Р4ЗРЕШЕНИЕ" },
+    { text: "БИНТ", error1: "Б1НТ", error2: "БИН7", error3: "Б3НТ" },
+    { text: "ОЧКИ", error1: "0ЧКИ", error2: "ОЧК1", error3: "4ЧКИ" },
+    { text: "ГЛАЗА", error1: "ГЛ4ЗА", error2: "ГЛАЗ4", error3: "ГЛ4З4" },
+    { text: "СВЕТ", error1: "СВ3Т", error2: "СВ6Т", error3: "5ВЕТ" },
+    { text: "ФОКУС", error1: "Ф0КУС", error2: "ФОКУ5", error3: "Ф4КУС" },
+    { text: "РЕЗКОСТЬ", error1: "РЕЗК0СТЬ", error2: "Р3ЗКОСТЬ", error3: "РЕЗКОСТ9" },
+    { text: "ЯРКОСТЬ", error1: "ЯРК0СТЬ", error2: "ЯРКОСТ6", error3: "ЯРК4СТЬ" },
+    { text: "КОНТРАСТ", error1: "К0НТРАСТ", error2: "КОНТР4СТ", error3: "КОНТРА5Т" }
+  ] : [
+    { text: "SCREEN", error1: "SCR33N", error2: "5CREEN", error3: "SCRE3N" },
+    { text: "SYSTEM", error1: "SY5TEM", error2: "SYS7EM", error3: "SYST3M" },
+    { text: "OBJECT", error1: "0BJECT", error2: "OBJ3CT", error3: "OBJEC7" },
+    { text: "VISION", error1: "V1SION", error2: "VISI0N", error3: "V1S10N" },
+    { text: "MONITOR", error1: "M0NITOR", error2: "MON1TOR", error3: "MONIT0R" },
+    { text: "KEYBOARD", error1: "KEYB0ARD", error2: "K3YBOARD", error3: "KEYBO4RD" },
+    { text: "MOUSE", error1: "M0USE", error2: "MOUS3", error3: "M4USE" },
+    { text: "DISPLAY", error1: "D1SPLAY", error2: "DISPL4Y", error3: "D1SPL4Y" },
+    { text: "RESOLUTION", error1: "RES0LUTION", error2: "RESOLUT10N", error3: "R3SOLUTION" },
+    { text: "PIXEL", error1: "P1XEL", error2: "PIX3L", error3: "P1X3L" },
+    { text: "BRIGHT", error1: "BR1GHT", error2: "BR1GHT", error3: "BR16HT" },
+    { text: "COLOR", error1: "C0LOR", error2: "COLO5", error3: "C4LOR" },
+    { text: "SHARP", error1: "SH4RP", error2: "5HARP", error3: "SHAR7" },
+    { text: "FOCUS", error1: "F0CUS", error2: "FOCU5", error3: "F4CUS" },
+    { text: "BLUR", error1: "BL5R", error2: "B1UR", error3: "BLU9" },
+    { text: "CLEAR", error1: "CL3AR", error2: "CLE4R", error3: "CLE4R" },
+    { text: "BRIGHTNESS", error1: "BR1GHTNESS", error2: "BRIGHTN3SS", error3: "BR1GHTN3SS" }
+  ];
+
+  const randomIndex = Math.floor(Math.random() * wordBank.length);
+  const word = wordBank[randomIndex];
+  const errorType = Math.floor(Math.random() * 3) + 1;
+  let errorWord = '';
+  if (errorType === 1) errorWord = word.error1;
+  else if (errorType === 2) errorWord = word.error2;
+  else errorWord = word.error3;
+  
+  let displayWords = [errorWord];
+  const otherWords = wordBank.filter((w, idx) => idx !== randomIndex);
+  for (let i = 0; i < 3 && i < otherWords.length; i++) {
+    const randomOther = otherWords[Math.floor(Math.random() * otherWords.length)];
+    displayWords.push(randomOther.text);
+  }
+  
+  for (let i = displayWords.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [displayWords[i], displayWords[j]] = [displayWords[j], displayWords[i]];
+  }
+
+  const wordsDiv = document.getElementById('ai-words');
+  if (wordsDiv) {
+    wordsDiv.innerHTML = displayWords.map(w => 
+      `<span style="display:inline-block;margin:8px;padding:10px 15px;background:#1e293b;border-radius:8px;font-family:monospace;font-size:20px;font-weight:bold">${w}</span>`
+    ).join('');
+  }
+  
+  const btnsDiv = document.getElementById('ai-btns');
+  if (!btnsDiv) return;
+  btnsDiv.innerHTML = '';
+  btnsDiv.className = 'btn-grid';
+  btnsDiv.style.gridTemplateColumns = 'repeat(2, 1fr)';
+  
+  for (let w of displayWords) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerHTML = w;
+    btn.style.fontFamily = 'monospace';
+    btn.style.fontSize = '20px';
+    btn.style.fontWeight = 'bold';
+    btn.style.padding = '12px';
+    btn.onclick = () => {
+      if (w === errorWord) { 
+        playCorrect(); 
+        score += 25;
+        btn.style.background = '#4ade80';
+        btn.style.color = '#000';
+        btn.style.transform = 'scale(0.95)';
+      } else { 
+        playWrong();
+        btn.style.background = '#f87171';
+        btn.style.color = '#fff';
+        btn.style.transform = 'scale(0.95)';
+      }
+      setTimeout(() => nextExercise(), 600);
+    };
+    btnsDiv.appendChild(btn);
+  }
+};
+
+// 5. ТЕСТ РАБКИНА
+window.run_rabkin = function() {
+  const container = document.getElementById('rabkin-container');
+  if (!container) return;
+  container.innerHTML = '';
+  const targetDigit = Math.floor(Math.random() * 9) + 1;
+  for (let i = 0; i < 60; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'rabkin-dot';
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    const size = Math.random() * 8 + 4;
+    let hue = Math.random() * 40 + 70;
+    let sat = Math.random() * 30 + 40;
+    let light = Math.random() * 20 + 40;
+    let color = `hsl(${hue}, ${sat}%, ${light}%)`;
+    if (Math.random() > 0.75) {
+      hue = Math.random() * 20;
+      sat = Math.random() * 40 + 50;
+      color = `hsl(${hue}, ${sat}%, ${light}%)`;
+    }
+    dot.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px;background:${color};opacity:${Math.random() * 0.5 + 0.5};position:absolute;border-radius:50%`;
+    container.appendChild(dot);
+  }
+  const overlay = document.createElement('div');
+  overlay.className = 'rabkin-digit-overlay';
+  overlay.innerText = targetDigit;
+  container.appendChild(overlay);
+  
+  const btns = document.getElementById('rabkin-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  let opts = [targetDigit, targetDigit + 1, targetDigit - 1, currentLang === 'ru' ? 'Ничего' : 'Nothing'];
+  opts = opts.filter(v => {
+    if (v === 'Ничего' || v === 'Nothing') return true;
+    if (typeof v === 'number') return v >= 1 && v <= 9;
+    return false;
+  });
+  opts.sort(() => Math.random() - 0.5);
+  
+  for (let opt of opts) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt == targetDigit) { playCorrect(); score += 15; results.rabkin = true; }
+      else { playWrong(); results.rabkin = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 6. ТЕСТ ЛАНДОЛЬТА (исправленный)
+window.run_landolt = function() {
+  const dirs = [
+    { name: '⬆️', angle: 0, label: 'вверх' },
+    { name: '➡️', angle: 90, label: 'вправо' },
+    { name: '⬇️', angle: 180, label: 'вниз' },
+    { name: '⬅️', angle: 270, label: 'влево' }
+  ];
+  const target = dirs[Math.floor(Math.random() * dirs.length)];
+  const ring = document.getElementById('landolt-ring');
+  if (ring) {
+    ring.style.transform = `rotate(${target.angle}deg)`;
+    ring.style.borderTopColor = 'transparent';
+    ring.style.borderRightColor = '#fff';
+    ring.style.borderBottomColor = '#fff';
+    ring.style.borderLeftColor = '#fff';
+  }
+  const btns = document.getElementById('landolt-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  
+  const directionBtns = ['⬆️', '➡️', '⬇️', '⬅️'];
+  for (let i = 0; i < directionBtns.length; i++) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerHTML = directionBtns[i];
+    btn.style.fontSize = '24px';
+    btn.onclick = () => {
+      if (directionBtns[i] === target.name) { 
+        playCorrect(); 
+        score += 10;
+        btn.style.background = '#4ade80';
+        btn.style.color = '#000';
+      } else { 
+        playWrong();
+        btn.style.background = '#f87171';
+        btn.style.color = '#fff';
+      }
+      setTimeout(() => nextExercise(), 300);
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 7. ТЕСТ ИШИХАРЫ
+window.run_ishihara = function() {
+  const num = Math.floor(Math.random() * 9) + 1;
+  const numSpan = document.getElementById('ishihara-num');
+  if (numSpan) numSpan.innerText = num;
+  const colors = [
+    'conic-gradient(from 0deg,#c0392b,#e67e22,#c0392b,#e67e22,#c0392b)',
+    'conic-gradient(from 45deg,#27ae60,#f39c12,#27ae60,#f39c12,#27ae60)',
+    'radial-gradient(circle at 30% 40%,#d35400,#8e44ad,#d35400)'
+  ];
+  const circle = document.getElementById('ishihara-circle');
+  if (circle) circle.style.background = colors[Math.floor(Math.random() * colors.length)];
+  
+  const btns = document.getElementById('ishihara-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  
+  let opts = [num, num + 1, num - 1, currentLang === 'ru' ? 'Ничего' : 'Nothing'];
+  opts = opts.filter(v => {
+    if (v === 'Ничего' || v === 'Nothing') return true;
+    if (typeof v === 'number') return v >= 1 && v <= 9;
+    return false;
+  });
+  opts.sort(() => Math.random() - 0.5);
+  
+  for (let opt of opts) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt == num) { playCorrect(); score += 12; results.ishihara = true; }
+      else { playWrong(); results.ishihara = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 8. ПЕРИМЕТРИЯ
+window.run_perimetry = function() {
+  const stage = document.getElementById('perimetry-stage');
+  const flash = document.getElementById('perimetry-flash');
+  let startBtn = document.getElementById('startPerimetry');
+  let skipBtn = document.getElementById('skipPerimetry');
+  if (!stage) return;
+  
+  function showFlash() {
+    if (!perimetryActive || perimetryCount >= 6) { endPerimetry(); return; }
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 60 + Math.random() * 80;
+    const x = 130 + Math.cos(angle) * radius;
+    const y = 130 + Math.sin(angle) * radius;
+    if (flash) {
+      flash.style.left = x + 'px';
+      flash.style.top = y + 'px';
+      flash.style.opacity = '1';
+    }
+    perimetryCount++;
+    if (perimetryTimer) clearTimeout(perimetryTimer);
+    perimetryTimer = setTimeout(() => {
+      if (flash) flash.style.opacity = '0';
+      setTimeout(showFlash, 400);
+    }, 700);
+  }
+  
+  function endPerimetry() {
+    perimetryActive = false;
+    if (perimetryTimer) clearTimeout(perimetryTimer);
+    const percent = perimetryCount ? (perimetryHits / perimetryCount) * 100 : 0;
+    results.perimetry = percent;
+    if (percent >= 60) { playCorrect(); score += 20; }
+    else if (percent >= 30) { score += 10; }
+    else { if (percent > 0) playWrong(); }
+    nextExercise();
+  }
+  
+  function handleClick() {
+    if (!perimetryActive) return;
+    if (flash && flash.style.opacity === '1') {
+      perimetryHits++;
+      if (perimetryTimer) clearTimeout(perimetryTimer);
+      flash.style.opacity = '0';
+      setTimeout(showFlash, 250);
+    }
+  }
+  
+  perimetryCount = 0; perimetryHits = 0; perimetryActive = true;
+  stage.onclick = handleClick;
+  
+  if (startBtn) {
+    const newStartBtn = startBtn.cloneNode(true);
+    startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+    newStartBtn.onclick = () => { perimetryActive = true; perimetryCount = 0; perimetryHits = 0; showFlash(); };
+  }
+  if (skipBtn) {
+    const newSkipBtn = skipBtn.cloneNode(true);
+    skipBtn.parentNode.replaceChild(newSkipBtn, skipBtn);
+    newSkipBtn.onclick = () => { if (perimetryActive) endPerimetry(); else nextExercise(); };
+  }
+  showFlash();
+};
+
+// 9. ТЕСТ АМСЛЕРА
+window.run_amsler = function() {
+  try {
+    const canvas = document.getElementById('amsler-canvas');
+    if (canvas && canvas.getContext) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 260, 260);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 20; i++) {
+        let p = i * 13;
+        ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, 260); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(260, p); ctx.stroke();
+      }
+    }
+  } catch(e) { console.warn('Canvas error:', e); }
+  
+  const btns = document.getElementById('amsler-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  const correctAnswer = currentLang === 'ru' ? 'Все прямые' : 'All straight';
+  const wrongAnswer = currentLang === 'ru' ? 'Есть искажения' : 'Some distorted';
+  let options = [correctAnswer, wrongAnswer];
+  options.sort(() => Math.random() - 0.5);
+  for (let opt of options) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt === correctAnswer) { playCorrect(); score += 12; results.amsler = true; }
+      else { playWrong(); results.amsler = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 10. ЗВЕЗДА СИМЕНСА
+window.run_siemens = function() {
+  try {
+    const canvas = document.getElementById('siemens-canvas');
+    if (canvas && canvas.getContext) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 200, 200);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 24; i++) {
+        let angle = i * 15 * Math.PI / 180;
+        let x = 100 + Math.cos(angle) * 90;
+        let y = 100 + Math.sin(angle) * 90;
+        ctx.beginPath(); ctx.moveTo(100, 100); ctx.lineTo(x, y); ctx.stroke();
+      }
+    }
+  } catch(e) { console.warn('Canvas error:', e); }
+  
+  const btns = document.getElementById('siemens-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  const correctAnswer = currentLang === 'ru' ? 'Все сходятся' : 'All converge';
+  const wrongAnswer = currentLang === 'ru' ? 'Есть разрывы' : 'Some broken';
+  let options = [correctAnswer, wrongAnswer];
+  options.sort(() => Math.random() - 0.5);
+  for (let opt of options) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt === correctAnswer) { playCorrect(); score += 10; results.siemens = true; }
+      else { playWrong(); results.siemens = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// 11. ТЕСТ ФИГУР
+window.run_figures = function() {
+  const shapes = [
+    { name: 'Круг', char: '●', size: '50px', color: '#ff3b30', glow: '0 0 10px #ff3b30' },
+    { name: 'Квадрат', char: '■', size: '45px', color: '#34c759', glow: '0 0 10px #34c759' },
+    { name: 'Треугольник', char: '▲', size: '48px', color: '#ffcc00', glow: '0 0 10px #ffcc00' },
+    { name: 'Ромб', char: '◆', size: '52px', color: '#00b4d8', glow: '0 0 10px #00b4d8' },
+    { name: 'Звезда', char: '★', size: '55px', color: '#ff6b6b', glow: '0 0 10px #ff6b6b' },
+    { name: 'Сердце', char: '♥', size: '50px', color: '#ff69b4', glow: '0 0 10px #ff69b4' },
+    { name: 'Крест', char: '✚', size: '48px', color: '#ffffff', glow: '0 0 10px #ffffff' },
+    { name: 'Пустой круг', char: '○', size: '55px', color: '#4ecdc4', glow: '0 0 10px #4ecdc4' },
+    { name: 'Треугольник низ', char: '▼', size: '48px', color: '#fca311', glow: '0 0 10px #fca311' },
+    { name: 'Пустой квадрат', char: '□', size: '50px', color: '#9b59b6', glow: '0 0 10px #9b59b6' },
+    { name: 'Шестиугольник', char: '⬡', size: '52px', color: '#e74c3c', glow: '0 0 10px #e74c3c' },
+    { name: 'Смайлик', char: '☺', size: '56px', color: '#f1c40f', glow: '0 0 10px #f1c40f' },
+    { name: 'Солнце', char: '☀', size: '58px', color: '#e67e22', glow: '0 0 10px #e67e22' }
+  ];
+  
+  const shuffled = [...shapes];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const selected = shuffled.slice(0, 4);
+  const targetIndex = Math.floor(Math.random() * selected.length);
+  const targetShape = selected[targetIndex];
+  
+  let differentShapes = shapes.filter(s => s.name !== targetShape.name && s.char !== targetShape.char);
+  const differentShape = differentShapes[Math.floor(Math.random() * differentShapes.length)];
+  const diffType = Math.floor(Math.random() * 3);
+  
+  const container = document.getElementById('figures-cont');
+  if (container) {
+    container.innerHTML = '';
+    container.style.display = 'flex';
+    container.style.gap = '20px';
+    container.style.justifyContent = 'center';
+    container.style.flexWrap = 'wrap';
+    container.style.padding = '20px';
+    
+    for (let i = 0; i < selected.length; i++) {
+      let div = document.createElement('div');
+      div.className = 'fig-item';
+      
+      const isDifferent = (i === targetIndex);
+      let displayShape = isDifferent ? differentShape : selected[i];
+      
+      if (isDifferent) {
+        if (diffType === 0) {
+          const sizes = ['40px', '45px', '50px', '55px', '60px', '65px', '70px'];
+          const differentSize = sizes.filter(s => s !== displayShape.size)[Math.floor(Math.random() * sizes.length)];
+          displayShape = { ...displayShape, size: differentSize };
+        } else if (diffType === 1) {
+          const colors = ['#ff3b30', '#34c759', '#ffcc00', '#00b4d8', '#ff6b6b', '#ff69b4', '#9b59b6', '#e74c3c'];
+          const differentColor = colors.filter(c => c !== displayShape.color)[Math.floor(Math.random() * colors.length)];
+          displayShape = { ...displayShape, color: differentColor, glow: `0 0 15px ${differentColor}` };
+        }
+      }
+      
+      div.innerText = displayShape.char;
+      div.style.fontSize = displayShape.size;
+      div.style.backgroundColor = '#1e293b';
+      div.style.padding = '20px';
+      div.style.borderRadius = '20px';
+      div.style.cursor = 'pointer';
+      div.style.transition = 'all 0.1s ease';
+      div.style.border = `3px solid ${displayShape.color}`;
+      div.style.color = displayShape.color;
+      div.style.boxShadow = displayShape.glow;
+      div.style.width = '80px';
+      div.style.height = '80px';
+      div.style.display = 'flex';
+      div.style.alignItems = 'center';
+      div.style.justifyContent = 'center';
+      
+      div.onmouseenter = () => { 
+        div.style.transform = 'scale(1.1) rotate(5deg)'; 
+        div.style.boxShadow = `0 0 20px ${displayShape.color}`;
+      };
+      div.onmouseleave = () => { 
+        div.style.transform = 'scale(1) rotate(0deg)'; 
+        div.style.boxShadow = displayShape.glow;
+      };
+      
+      div.onclick = () => {
+        if (isDifferent) { 
+          playCorrect(); 
+          score += 15; 
+          results.figures = true;
+          div.style.background = '#4ade80';
+          div.style.color = '#000';
+          div.style.transform = 'scale(1.2)';
+          div.style.animation = 'pulse 0.3s ease';
+        } else { 
+          playWrong(); 
+          results.figures = false;
+          div.style.background = '#f87171';
+          div.style.transform = 'scale(0.95)';
+        }
+        setTimeout(() => nextExercise(), 600);
+      };
+      container.appendChild(div);
+    }
+  }
+  
+  const btns = document.getElementById('figures-btns');
+  if (btns) {
+    btns.innerHTML = '';
+    let skip = document.createElement('button');
+    skip.className = 'vision-btn';
+    skip.innerText = currentLang === 'ru' ? '❌ Не вижу отличий' : '❌ No difference';
+    skip.style.marginTop = '15px';
+    skip.style.background = '#334155';
+    skip.onclick = () => { 
+      playWrong(); 
+      results.figures = false; 
+      nextExercise(); 
+    };
+    btns.appendChild(skip);
+  }
+};
+
+// 12. ПУЛЬС-ТЕСТ
+window.run_pulse = function() {
+  const grid = document.getElementById('pulse-squares');
+  if (!grid) return;
+  grid.innerHTML = '';
+  for (let i = 0; i < 9; i++) {
+    let sq = document.createElement('div');
+    sq.className = 'square';
+    sq.dataset.idx = i;
+    sq.onclick = () => {
+      if (pulseActive && parseInt(sq.dataset.idx) === pulseExpected) {
+        pulseHits++;
+        sq.classList.add('active');
+        setTimeout(() => sq.classList.remove('active'), 150);
+      }
+    };
+    grid.appendChild(sq);
+  }
+  
+  let startBtn = document.getElementById('startPulse');
+  let skipBtn = document.getElementById('skipPulse');
+  let sequence = [];
+  for (let i = 0; i < 6; i++) sequence.push(Math.floor(Math.random() * 9));
+  let idx = 0;
+  pulseTotal = sequence.length;
+  
+  function startSequence() {
+    if (pulseInterval) { clearInterval(pulseInterval); pulseInterval = null; }
+    pulseActive = true;
+    pulseHits = 0;
+    idx = 0;
+    pulseInterval = setInterval(() => {
+      if (!pulseActive || idx >= sequence.length) {
+        if (pulseInterval) clearInterval(pulseInterval);
+        pulseInterval = null;
+        endPulse();
+        return;
+      }
+      pulseExpected = sequence[idx];
+      const sq = document.querySelector(`.square[data-idx='${pulseExpected}']`);
+      if (sq) { sq.classList.add('active'); setTimeout(() => sq.classList.remove('active'), 200); }
+      idx++;
+    }, 1200);
+  }
+  
+  function endPulse() {
+    pulseActive = false;
+    if (pulseInterval) { clearInterval(pulseInterval); pulseInterval = null; }
+    const accuracy = (pulseHits / pulseTotal) * 100;
+    results.pulse = accuracy;
+    if (accuracy >= 70) { playCorrect(); score += 20; }
+    else if (accuracy >= 40) { score += 10; }
+    else { if (accuracy > 0) playWrong(); }
+    nextExercise();
+  }
+  
+  if (startBtn) {
+    const newStartBtn = startBtn.cloneNode(true);
+    startBtn.parentNode.replaceChild(newStartBtn, startBtn);
+    newStartBtn.onclick = () => startSequence();
+  }
+  if (skipBtn) {
+    const newSkipBtn = skipBtn.cloneNode(true);
+    skipBtn.parentNode.replaceChild(newSkipBtn, skipBtn);
+    newSkipBtn.onclick = () => {
+      if (pulseInterval) { clearInterval(pulseInterval); pulseInterval = null; }
+      if (pulseActive) endPulse();
+      else nextExercise();
+    };
+  }
+};
+
+// 13. КОНТРАСТ
+window.run_contrast = function() {
+  const contrasts = currentLang === 'ru' ? ['Высокая', 'Средняя', 'Низкая'] : ['High', 'Medium', 'Low'];
+  const target = contrasts[Math.floor(Math.random() * 3)];
+  const bar = document.getElementById('contrast-bar');
+  if (bar) {
+    if (target === (currentLang === 'ru' ? 'Высокая' : 'High')) bar.style.background = 'linear-gradient(to right,#ccc,#fff)';
+    else if (target === (currentLang === 'ru' ? 'Средняя' : 'Medium')) bar.style.background = 'linear-gradient(to right,#888,#ccc)';
+    else bar.style.background = 'linear-gradient(to right,#555,#888)';
+  }
+  const btns = document.getElementById('contrast-btns');
+  if (!btns) return;
+  btns.innerHTML = '';
+  let opts = [...contrasts];
+  opts.sort(() => Math.random() - 0.5);
+  for (let opt of opts) {
+    let btn = document.createElement('button');
+    btn.className = 'vision-btn';
+    btn.innerText = opt;
+    btn.onclick = () => {
+      if (opt === target) { playCorrect(); score += 10; results.contrast = true; }
+      else { playWrong(); results.contrast = false; }
+      nextExercise();
+    };
+    btns.appendChild(btn);
+  }
+};
+
+// ========== ФИНАЛ ==========
+function showFinal() {
+  clearActiveTests();
+  currentTestInstance = null;
+  showStage('final');
+  playComplete();
+  
+  const ball = document.getElementById('final-ball');
+  const box = document.getElementById('final-box');
+  const text = document.getElementById('final-text');
+  let color, emoji, msg;
+  if (score >= 80) { color = 'green'; emoji = '🟢'; msg = t('result_excellent'); }
+  else if (score >= 50) { color = 'yellow'; emoji = '🟡'; msg = t('result_warning'); }
+  else { color = 'red'; emoji = '🔴'; msg = t('result_critical'); }
+  if (ball) { ball.className = `status-ball ${color}`; ball.innerHTML = emoji; }
+  if (box) box.innerHTML = `${currentLang === 'ru' ? 'Баллы' : 'Score'}: ${score}`;
+  if (text) {
+    text.innerHTML = msg;
+    let warnings = '';
+    if (results.rabkin === false) warnings += '<br>⚠️ ' + t('warn_rabkin');
+    if (results.ishihara === false) warnings += '<br>⚠️ ' + t('warn_ishihara');
+    if (results.astig === false) warnings += '<br>⚠️ ' + t('warn_astig');
+    if (results.amsler === false) warnings += '<br>⚠️ ' + t('warn_amsler');
+    if (results.perimetry < 50) warnings += '<br>⚠️ ' + t('warn_perimetry');
+    if (warnings) text.innerHTML += `<br><br><b>${currentLang === 'ru' ? 'Отмечено' : 'Notes'}:</b>${warnings}`;
+  }
+}
+
+function shareResults() {
+  const statusText = score >= 80 ? (currentLang === 'ru' ? 'Отлично' : 'Excellent') : 
+                     score >= 50 ? (currentLang === 'ru' ? 'Внимание' : 'Warning') : 
+                     (currentLang === 'ru' ? 'Требуется консультация' : 'Consultation recommended');
+  const textMsg = `Anti AI Vision Check\n${currentLang === 'ru' ? 'Баллы' : 'Score'}: ${score}\n${currentLang === 'ru' ? 'Статус' : 'Status'}: ${statusText}`;
+  if (navigator.share) { navigator.share({ title: currentLang === 'ru' ? 'Результаты теста зрения' : 'Vision Test Results', text: textMsg }).catch(() => {}); }
+  else { navigator.clipboard.writeText(textMsg).then(() => alert(currentLang === 'ru' ? 'Результаты скопированы в буфер обмена!' : 'Results copied to clipboard!')).catch(() => alert(textMsg)); }
+}
+
+function startTest() {
+  clearActiveTests();
+  score = 0; level = 0; results = {};
+  order = shuffle([...allStages]);
+  currentIndex = 0;
+  currentTestInstance = null;
+  updateCounter();
+  updateProgress();
+  showScreen('app');
+  const firstStage = order[0];
+  currentTestInstance = firstStage;
+  showStage(firstStage);
+  if (window[`run_${firstStage}`]) window[`run_${firstStage}`]();
+}
+
+function restartTest() { startTest(); }
+
+function applyTranslations() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    if (!el || !el.dataset) return;
+    const key = el.dataset.t;
+    if (translations[currentLang] && translations[currentLang][key]) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        if (el.placeholder !== undefined) el.placeholder = translations[currentLang][key];
+      } else { el.innerHTML = translations[currentLang][key]; }
+    }
+  });
+  document.title = currentLang === 'ru' ? '👁️ Анти ИИ Проверка зрения' : '👁️ Anti AI Vision Check';
+  updateCounter();
+}
+
+// ========== ОБРАБОТЧИКИ ==========
+document.getElementById('btnStartApp').onclick = startTest;
+document.getElementById('appBack').onclick = () => { clearActiveTests(); showScreen('howto'); };
+document.getElementById('restartBtn').onclick = restartTest;
+document.getElementById('shareResults').onclick = shareResults;
+document.getElementById('toMenu').onclick = () => { clearActiveTests(); showScreen('howto'); };
+
+const supportBtn = document.getElementById('btnSupport');
+if (supportBtn) {
+  supportBtn.onclick = () => {
+    const panel = document.getElementById('supportPanel');
+    const content = document.querySelector('.howto-content');
+    const footer = document.querySelector('.howto-footer');
+    if (panel) panel.classList.add('show');
+    if (content) content.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+  };
+}
+
+const backBtn = document.getElementById('btnBack');
+if (backBtn) {
+  backBtn.onclick = () => {
+    const panel = document.getElementById('supportPanel');
+    const content = document.querySelector('.howto-content');
+    const footer = document.querySelector('.howto-footer');
+    if (panel) panel.classList.remove('show');
+    if (content) content.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+  };
+}
+
+const copyBtn = document.getElementById('copyBtn');
+if (copyBtn) {
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText('8-920-227-56-76').then(() => {
+      const original = copyBtn.innerText;
+      copyBtn.innerText = '✅';
+      setTimeout(() => copyBtn.innerText = original, 1500);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = '8-920-227-56-76';
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      copyBtn.innerText = '✅';
+      setTimeout(() => copyBtn.innerText = '📋 Копировать', 1500);
+    });
+  };
+}
+
+const langToggle = document.getElementById('langToggle');
+if (langToggle) {
+  langToggle.onclick = () => {
+    currentLang = currentLang === 'ru' ? 'en' : 'ru';
+    langToggle.innerText = currentLang.toUpperCase();
+    applyTranslations();
+    if (currentIndex < order.length && order[currentIndex] && window[`run_${order[currentIndex]}`]) {
+      window[`run_${order[currentIndex]}`]();
+    }
+  };
+}
+
+applyTranslations();
+console.log('✅ Anti AI Vision Check v2.3 loaded! Исправлен счетчик тестов (больше нет 14/13)');
+</script>
+</body>
+</html>
